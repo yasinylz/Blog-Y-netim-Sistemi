@@ -1,1 +1,1 @@
-# Blog-Y-netim-Sistemi
+# Blog Management System API
