@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
-import postRouters from './routes/postRouters';
+import Routers from './routes/index';
 import config from './config';
 
 const app = express();
@@ -18,7 +18,7 @@ mongoose.connect(config.MONGODB_URL)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // API rotalarını kullanmaya başla
-app.use('/api', postRouters);
+app.use('/api', Routers);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
