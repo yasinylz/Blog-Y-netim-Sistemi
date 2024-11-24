@@ -9,6 +9,8 @@ interface Config {
   PORT: number;
   REDIS_PORT: number;
   REDIS_HOST: string;
+  JWT_SECRETKEY:string;
+  JWT_EXPIRE_IN:string;
 }
 
 // Çevresel değişkenlerin tipi kontrolü yapılırken, `process.env`'den gelen değerlerin her zaman string olduğunu unutmayın
@@ -17,6 +19,8 @@ const config: Config = {
   PORT: process.env.PORT ? parseInt(process.env.PORT, 10) : 5000, // Port numarasını `number` yap
   REDIS_PORT: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379, // Varsayılan Redis portu
   REDIS_HOST: process.env.REDIS_HOST || 'localhost', // Varsayılan Redis host
+  JWT_SECRETKEY:process.env.JWT_SECRETKEY ||'56sdfs1df61sfs6df',
+  JWT_EXPIRE_IN:process.env.JWT_EXPIRE_IN ||'1h'
 };
 
 export default config;
