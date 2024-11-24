@@ -1,6 +1,7 @@
 import  {Request, Response} from 'express'
 import bcrypt from 'bcryptjs';
 import User from '../models/User'
+import { generateToken } from '../utils/jwtUtils';
 
 export const registerUser = async (req: Request, res: Response) => {  
     const { name, email, password } = req.body;
@@ -19,28 +20,36 @@ export const registerUser = async (req: Request, res: Response) => {
     }
   }
 
-export const  loginUser  =async(req:Request, res:Response):Promise<void>=>{
-    const  {email,password}=req.body;
+  export interface CustomRequest extends Request {
+    user?: { id: string; email: string }; // Kullanıcı bilgisi burada özelleştirildi
+  }
+  export const loginUser = async (req: CustomRequest, res: Response) => {
+    const { email, password } = req.body;
+  
     try {
-        const  user=await User.findOne({ email})
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
-            return 
-          }
-          const isMatch= await bcrypt.compare(password,user.password)
-          if (!isMatch) {
-            res.status(400).json({ message: 'Invalid password' });
-            return
-          }
-          res.json({ message: 'User logged in', user });
+      const user = await User.findOne({ email }); // Kullanıcıyı email ile bul
+      if (!user) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+      }
+  
+      const isMatch = await bcrypt.compare(password, user.password); // Şifre kontrolü
+      if (!isMatch) {
+        res.status(400).json({ message: 'Invalid password' });
+        return;
+      }
+  
+      const token = generateToken({ id: user.id, email: user.email }); // Kullanıcı bilgileriyle token oluştur
+      res.json({ message: 'User logged in', token });
     } catch (error) {
-        res.status(500).json({ error });
+      res.status(500).json({ error: 'Internal server error' });
+      console.log(error);
     }
-}
+  };
 
 export const getAllUsers=async(req:Request,res:Response):Promise<void>=>{
     try {
-        const users = await User.find();
+        const users = await User.find().select('-password');
         res.status(200).json(users);
     
     } catch (error) {
@@ -50,7 +59,7 @@ export const getAllUsers=async(req:Request,res:Response):Promise<void>=>{
 export  const getUserById=async(req:Request,res:Response):Promise<void>=>{
 const  {id}=req.params;
 try {
-    const  user = await User.findById(id);
+    const  user = await User.findById(id).select('-password');
     if (!user) {
         res.status(404).json({ message: 'User not found' });
         return 
